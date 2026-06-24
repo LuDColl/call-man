@@ -1,13 +1,13 @@
 import { CallService } from './call.service';
+import { CallRequest } from './call.interface';
 import { MatInputModule } from '@angular/material/input';
-import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { form, FormField, FormRoot, required } from '@angular/forms/signals';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
+import { form, FormField, FormRoot, required } from '@angular/forms/signals';
 
 @Component({
   templateUrl: 'call.html',
@@ -24,15 +24,20 @@ import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
     MatAutocompleteModule,
   ],
 })
-export class CallComponent {
-  private readonly http = inject(HttpClient);
-  private readonly service = inject(CallService);
+export class CallComponent<Req, Res> {
+  private readonly service = inject(CallService<Req, Res>);
 
-  body = signal('');
-  methods = signal(['GET', 'POST']);
-  model = signal({ url: this.service.url, method: this.service.methods[0] });
+  private readonly model = signal<CallRequest<Req>>({
+    url: this.service.url(),
+    body: this.service.body(),
+    method: this.service.method(),
+    options: this.service.options(),
+  });
 
-  form = form(
+  readonly methods = this.service.methods;
+  readonly body = computed(() => this.service.response()?.body);
+
+  readonly form = form(
     this.model,
     (schemaPath) => {
       required(schemaPath.url);
@@ -40,19 +45,12 @@ export class CallComponent {
     },
     {
       submission: {
-        action: async (tree) => {
-          const state = tree();
-          const { value: signal } = state;
-          const value = signal();
-          const request = new HttpRequest(value.method, value.url, null, {});
-          this.http.request<any>(request).subscribe((event) => {
-            if (!(event instanceof HttpResponse)) return;
-            this.body.set(JSON.stringify(event.body, null, 2));
-          });
+        action: async () => {
+          const model = this.model();
+          this.service.update(model);
+          this.service.call();
         },
       },
     },
   );
-
-  options: string[] = [];
 }
