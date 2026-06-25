@@ -1,28 +1,32 @@
 <form [formRoot]="form">
-  <mat-form-field>
-    <mat-label>Method</mat-label>
-    <mat-select [formField]="form.method">
-      @for (method of methods(); track method) {
-        <mat-option [value]="method">{{ method }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>URL</mat-label>
-    <input
-      type="text"
-      placeholder="Pick one"
-      aria-label="URL"
-      matInput
-      [formField]="form.url"
-      [matAutocomplete]="auto"
-    />
-    <mat-autocomplete #auto="matAutocomplete">
-      <!-- @for (option of filteredOptions | async; track option) {
+  <div class="form-fields">
+    <mat-form-field class="method">
+      <mat-label>Method</mat-label>
+      <mat-select [formField]="form.method">
+        @for (method of methods(); track method) {
+          <mat-option [value]="method">{{ method }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="url">
+      <mat-label>URL</mat-label>
+      <input
+        matInput
+        type="text"
+        aria-label="URL"
+        [formField]="form.url"
+        [matAutocomplete]="auto"
+        placeholder="https://example.com"
+      />
+      <mat-autocomplete #auto="matAutocomplete">
+        <!-- @for (option of filteredOptions | async; track option) {
         <mat-option [value]="option">{{ option }}</mat-option>
       } -->
-    </mat-autocomplete>
-  </mat-form-field>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
   <button matButton="filled" type="submit">Call</button>
 </form>
-{{ body() }}
+<pre>
+  <code [highlight]="body() | json" language="json"></code>
+</pre>

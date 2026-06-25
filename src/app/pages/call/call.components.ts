@@ -1,3 +1,5 @@
+import { JsonPipe } from '@angular/common';
+import { Highlight } from 'ngx-highlightjs';
 import { CallService } from './call.service';
 import { CallRequest } from './call.interface';
 import { MatInputModule } from '@angular/material/input';
@@ -14,7 +16,9 @@ import { form, FormField, FormRoot, required } from '@angular/forms/signals';
   styleUrl: 'call.scss',
   imports: [
     FormRoot,
+    JsonPipe,
     FormField,
+    Highlight,
     FormsModule,
     MatInputModule,
     MatButtonModule,
@@ -31,7 +35,7 @@ export class CallComponent<Req, Res> {
     url: this.service.url(),
     body: this.service.body(),
     method: this.service.method(),
-    options: this.service.options(),
+    headers: this.service.headers(),
   });
 
   readonly methods = this.service.methods;
@@ -48,7 +52,7 @@ export class CallComponent<Req, Res> {
         action: async () => {
           const model = this.model();
           this.service.update(model);
-          this.service.call();
+          this.service.call().subscribe();
         },
       },
     },
