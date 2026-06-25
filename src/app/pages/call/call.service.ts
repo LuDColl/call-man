@@ -2,19 +2,21 @@ import { tap } from 'rxjs';
 import { CallRequest } from './call.interface';
 import { computed, inject, Service, signal } from '@angular/core';
 import {
-  HttpClient,
-  HttpErrorResponse,
   HttpEvent,
+  HttpClient,
   HttpHeaders,
   HttpRequest,
-  HttpRequestOptions,
   HttpResponse,
+  HttpErrorResponse,
+  HttpRequestOptions,
 } from '@angular/common/http';
+import { NGXLogger } from 'ngx-logger';
 
 @Service()
 export class CallService<Req, Res> {
   private readonly _url = signal('');
   private readonly _methods = signal(['GET']);
+  private readonly _logger = inject(NGXLogger);
   private readonly _client = inject(HttpClient);
   private readonly _body = signal<Req | null>(null);
   private readonly _method = signal(this._methods()[0]);
@@ -58,6 +60,6 @@ export class CallService<Req, Res> {
   };
 
   private readonly onError = (error: HttpErrorResponse) => {
-    console.error('HTTP Error:', error);
+    this._logger.error(error);
   };
 }
