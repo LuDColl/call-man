@@ -31,18 +31,11 @@ import { form, FormField, FormRoot, required } from '@angular/forms/signals';
 export class CallComponent<Req, Res> {
   private readonly service = inject(CallService<Req, Res>);
 
-  private readonly model = signal<CallRequest<Req>>({
-    url: this.service.url(),
-    body: this.service.body(),
-    method: this.service.method(),
-    headers: this.service.headers(),
-  });
-
   readonly methods = this.service.methods;
   readonly body = computed(() => this.service.response()?.body);
 
   readonly form = form(
-    this.model,
+    this.service.model,
     (schemaPath) => {
       required(schemaPath.url);
       required(schemaPath.method);
@@ -50,8 +43,6 @@ export class CallComponent<Req, Res> {
     {
       submission: {
         action: async () => {
-          const model = this.model();
-          this.service.update(model);
           this.service.call().subscribe();
         },
       },
